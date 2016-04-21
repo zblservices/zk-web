@@ -2,16 +2,27 @@
   (:import [com.netflix.curator.retry RetryNTimes]
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
-  (:use zk-web.util))
+  (:require [zk-web.conf :as conf]
+            [zk-web.util :as util])
+  (:use zk-web.util)
+ )
+
+(defonce scheme (:digest conf/load-conf))
+(defonce auth (:auth conf/load-conf))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
   [ addr ]
-  (let [cli (-> (CuratorFrameworkFactory/builder)
+  (let [scheme (:scheme (conf/load-conf))
+        auth (:auth (conf/load-conf))
+        cli (-> (CuratorFrameworkFactory/builder)
                 (.connectString addr)
                 (.retryPolicy (RetryNTimes. (int 3) (int 1000)))
+		(.authorization (str scheme), (.getBytes (str auth)))
                 (.build))
         _ (.start cli)]
+    (println (str scheme) )
+    (println (str auth) )
     cli))
 
 ;; memorize this function to save net connection

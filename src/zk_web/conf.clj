@@ -20,14 +20,24 @@
         pwd-conf "conf/zk-web-conf.clj"
         env-port (u/str->int (System/getenv "PORT"))
         env-node (str (System/getenv "DEFAULT_NODE"))
+        env-scheme (str (System/getenv "AUTH_SCHEME"))
+	env-auth   (str (System/getenv "AUTH_STRING"))
         conf     (or (load-conf-file home-conf) (load-conf-file pwd-conf)
                   {
                    :server-port 8080
                    :users {"admin" "hello"}
                    :default-node ""
+                   :scheme ""
+		   :auth ""
                   })]
         (if env-port
           (assoc conf :server-port env-port)
+          conf)
+        (if env-scheme
+          (assoc conf :scheme env-scheme) 
+          conf)
+        (if env-auth
+          (assoc conf :auth env-auth) 
           conf)
         (if env-node
           (assoc conf :default-node env-node)
